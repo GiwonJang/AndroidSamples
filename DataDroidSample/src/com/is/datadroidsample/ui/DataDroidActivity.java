@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentActivity;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.is.datadroidsample.R;
 import com.is.datadroidsample.data.requestmanager.SampleRequestManager;
+import com.is.datadroidsample.dialogs.ErrorDialogFragment.ErrorDialogFragmentBuilder;
 
 public abstract class DataDroidActivity extends FragmentActivity {
 
@@ -37,8 +38,7 @@ public abstract class DataDroidActivity extends FragmentActivity {
 	}
 
 	protected void showBadDataErrorDialog() {
-		// new
-		// ErrorDialogFragmentBuilder(this).setTitle(R.string.dialog_error_data_error_title)
-		// .setMessage(R.string.dialog_error_data_error_message).show();
+		new ErrorDialogFragmentBuilder(this).setTitle(R.string.dialog_error_data_error_title)
+											.setMessage(R.string.dialog_error_data_error_message).show();
 	}
 }

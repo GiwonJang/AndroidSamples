@@ -30,15 +30,14 @@ import com.is.datadroidsample.data.requestmanager.SampleRequestFactory;
 import com.is.datadroidsample.dialogs.ConnectionErrorDialogFragment;
 import com.is.datadroidsample.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 
-public class MainActivity extends DataDroidActivity
-						implements RequestListener, OnClickListener, OnItemClickListener, ConnectionErrorDialogListener {
+public class MainActivity extends DataDroidActivity implements RequestListener, OnClickListener, OnItemClickListener, ConnectionErrorDialogListener {
 
-	private static final String SAVED_STATE_RSS_ITEM_LIST = "savedStateRssItemList";
-	private LayoutInflater		_inflater;
-	private String[]			_feedUrlArray;
-	private RssItem_listAdapter	_listAdapter;
-	private ListView			_listView;
-	private Spinner				_spinnerFeedUrl;
+	private static final String	SAVED_STATE_RSS_ITEM_LIST	= "savedStateRssItemList";
+	private LayoutInflater		mInflater;
+	private String[]			mFeedUrlArray;
+	private RssItem_listAdapter	mListAdapter;
+	private ListView			mListView;
+	private Spinner				mSpinnerFeedUrl;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +46,8 @@ public class MainActivity extends DataDroidActivity
 
 		setContentView(R.layout.activity_main);
 		bindViews();
-		_feedUrlArray = getResources().getStringArray(R.array.rss_feed_url);
-		_inflater = getLayoutInflater();
+		mFeedUrlArray = getResources().getStringArray(R.array.rss_feed_url);
+		mInflater = getLayoutInflater();
 	}
 
 	@Override
@@ -88,8 +87,8 @@ public class MainActivity extends DataDroidActivity
 		super.onSaveInstanceState(outState);
 
 		ArrayList<RssItem> rssItemList = new ArrayList<RssItem>();
-		for (int i = 0, n = _listAdapter.getCount(); i < n; i++) {
-			rssItemList.add(_listAdapter.getItem(i));
+		for (int i = 0, n = mListAdapter.getCount(); i < n; i++) {
+			rssItemList.add(mListAdapter.getItem(i));
 		}
 
 		outState.putParcelableArrayList(SAVED_STATE_RSS_ITEM_LIST, rssItemList);
@@ -100,143 +99,142 @@ public class MainActivity extends DataDroidActivity
 		super.onRestoreInstanceState(savedInstanceState);
 
 		ArrayList<RssItem> rssItemList = savedInstanceState.getParcelableArrayList(SAVED_STATE_RSS_ITEM_LIST);
-		_listAdapter.setNotifyOnChange(false);
+		mListAdapter.setNotifyOnChange(false);
 		for (int i = 0, length = rssItemList.size(); i < length; i++) {
-			_listAdapter.add(rssItemList.get(i));
+			mListAdapter.add(rssItemList.get(i));
 		}
-		_listAdapter.notifyDataSetChanged();
+		mListAdapter.notifyDataSetChanged();
 	}
 
 	private void bindViews() {
-		_spinnerFeedUrl = (Spinner) findViewById(R.id.sp_url);
+		mSpinnerFeedUrl = (Spinner) findViewById(R.id.sp_url);
 
-        ((Button) findViewById(R.id.b_load)).setOnClickListener(this);
-        ((Button) findViewById(R.id.b_clear_memory)).setOnClickListener(this);
+		((Button) findViewById(R.id.b_load)).setOnClickListener(this);
+		((Button) findViewById(R.id.b_clear_memory)).setOnClickListener(this);
 
-        _listView = (ListView) findViewById(android.R.id.list);
-        _listAdapter = new RssItem_listAdapter(this);
-        _listView.setAdapter(_listAdapter);
-        _listView.setOnItemClickListener(this);
-        _listView.setEmptyView(findViewById(android.R.id.empty));
-    }
+		mListView = (ListView) findViewById(android.R.id.list);
+		mListAdapter = new RssItem_listAdapter(this);
+		mListView.setAdapter(mListAdapter);
+		mListView.setOnItemClickListener(this);
+		mListView.setEmptyView(findViewById(android.R.id.empty));
+	}
 
-    private void callRssFeedWS() {
-        _listAdapter.clear();
-        setProgressBarIndeterminateVisibility(true);
+	private void callRssFeedWS() {
+		mListAdapter.clear();
+		setProgressBarIndeterminateVisibility(true);
 
-        Request request = SampleRequestFactory.getRssFeedRequest(_feedUrlArray[_spinnerFeedUrl.getSelectedItemPosition()]);
-        mRequestManager.execute(request, this);
-        mRequestList.add(request);
-    }
+		Request request = SampleRequestFactory.getRssFeedRequest(mFeedUrlArray[mSpinnerFeedUrl.getSelectedItemPosition()]);
+		mRequestManager.execute(request, this);
+		mRequestList.add(request);
+	}
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.b_load:
-                callRssFeedWS();
-                break;
-            case R.id.b_clear_memory:
-                _listAdapter.clear();
-                break;
-        }
-    }
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+			case R.id.b_load:
+				callRssFeedWS();
+				break;
+			case R.id.b_clear_memory:
+				mListAdapter.clear();
+				break;
+		}
+	}
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position,
-            long id) {
-        RssItem rssItem = ((RssItem_listAdapter) parent.getAdapter()).getItem(position);
-        if (rssItem != null) {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(rssItem.link)));
-        }
-    }
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		RssItem rssItem = ((RssItem_listAdapter) parent.getAdapter()).getItem(position);
+		if (rssItem != null) {
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(rssItem.link)));
+		}
+	}
 
-    @Override
-    public void onRequestFinished(Request request, Bundle resultData) {
-        if (mRequestList.contains(request)) {
-            setProgressBarIndeterminateVisibility(false);
-            mRequestList.remove(request);
+	@Override
+	public void onRequestFinished(Request request, Bundle resultData) {
+		if (mRequestList.contains(request)) {
+			setProgressBarIndeterminateVisibility(false);
+			mRequestList.remove(request);
 
-            RssFeed rssFeed = resultData
-                    .getParcelable(SampleRequestFactory.BUNDLE_EXTRA_RSS_FEED_DATA);
+			RssFeed rssFeed = resultData.getParcelable(SampleRequestFactory.BUNDLE_EXTRA_RSS_FEED_DATA);
 
-            _listAdapter.setNotifyOnChange(false);
-            for (RssItem rssItem : rssFeed.rssItemList) {
-                _listAdapter.add(rssItem);
-            }
-            _listAdapter.notifyDataSetChanged();
-        }
-    }
+			mListAdapter.setNotifyOnChange(false);
+			for (RssItem rssItem : rssFeed.rssItemList) {
+				mListAdapter.add(rssItem);
+			}
+			mListAdapter.notifyDataSetChanged();
+		}
+	}
 
-    @Override
-    public void onRequestConnectionError(Request request, int statusCode) {
-        if (mRequestList.contains(request)) {
-            setProgressBarIndeterminateVisibility(false);
-            mRequestList.remove(request);
+	@Override
+	public void onRequestConnectionError(Request request, int statusCode) {
+		if (mRequestList.contains(request)) {
+			setProgressBarIndeterminateVisibility(false);
+			mRequestList.remove(request);
 
-            ConnectionErrorDialogFragment.show(this, request, this);
-        }
-    }
+			ConnectionErrorDialogFragment.show(this, request, this);
+		}
+	}
 
-    @Override
-    public void onRequestDataError(Request request) {
-        if (mRequestList.contains(request)) {
-            setProgressBarIndeterminateVisibility(false);
-            mRequestList.remove(request);
+	@Override
+	public void onRequestDataError(Request request) {
+		if (mRequestList.contains(request)) {
+			setProgressBarIndeterminateVisibility(false);
+			mRequestList.remove(request);
 
-            showBadDataErrorDialog();
-        }
-    }
+			showBadDataErrorDialog();
+		}
+	}
 
-    @Override
-    public void onRequestCustomError(Request request, Bundle resultData) {
-        // Never called.
-    }
+	@Override
+	public void onRequestCustomError(Request request, Bundle resultData) {
+		// Never called.
+	}
 
-    @Override
-    public void connectionErrorDialogCancel(Request request) {}
+	@Override
+	public void connectionErrorDialogCancel(Request request) {
+	}
 
-    @Override
-    public void connectionErrorDialogRetry(Request request) {
-        callRssFeedWS();
-    }
+	@Override
+	public void connectionErrorDialogRetry(Request request) {
+		callRssFeedWS();
+	}
 
-    class ViewHolder {
-        private TextView mTextViewTitle;
-        private TextView mTextViewDescription;
+	class ViewHolder {
+		private TextView	mTextViewTitle;
+		private TextView	mTextViewDescription;
 
-        public ViewHolder(View view) {
-            mTextViewTitle = (TextView) view.findViewById(R.id.tv_title);
-            mTextViewDescription = (TextView) view.findViewById(R.id.tv_description);
-        }
+		public ViewHolder(View view) {
+			mTextViewTitle = (TextView) view.findViewById(R.id.tv_title);
+			mTextViewDescription = (TextView) view.findViewById(R.id.tv_description);
+		}
 
-        public void populateViews(RssItem rssItem) {
-            mTextViewTitle.setText(rssItem.title);
-            mTextViewDescription.setText(Html.fromHtml(rssItem.description));
-        }
-    }
+		public void populateViews(RssItem rssItem) {
+			mTextViewTitle.setText(rssItem.title);
+			mTextViewDescription.setText(Html.fromHtml(rssItem.description));
+		}
+	}
 
-    class RssItem_listAdapter extends ArrayAdapter<RssItem> {
+	class RssItem_listAdapter extends ArrayAdapter<RssItem> {
 
-        public RssItem_listAdapter(Context context) {
-            super(context, 0);
-        }
+		public RssItem_listAdapter(Context context) {
+			super(context, 0);
+		}
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder viewHolder;
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder viewHolder;
 
-            if (convertView == null) {
-                convertView = _inflater.inflate(R.layout.rss_feed_list_item, null);
-                viewHolder = new ViewHolder(convertView);
-                convertView.setTag(viewHolder);
-            } else {
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
+			if (convertView == null) {
+				convertView = mInflater.inflate(R.layout.rss_feed_list_item, null);
+				viewHolder = new ViewHolder(convertView);
+				convertView.setTag(viewHolder);
+			} else {
+				viewHolder = (ViewHolder) convertView.getTag();
+			}
 
-            viewHolder.populateViews(getItem(position));
+			viewHolder.populateViews(getItem(position));
 
-            return convertView;
-        }
-    }
+			return convertView;
+		}
+	}
 
 }

@@ -6,6 +6,7 @@ import com.foxykeep.datadroid.exception.CustomRequestException;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService;
 import com.is.datadroidsample.data.exception.MyCustomRequestException;
+import com.is.datadroidsample.data.operation.RssFeedOperation;
 import com.is.datadroidsample.data.requestmanager.SampleRequestFactory;
 
 public class SampleService extends RequestService {
@@ -34,9 +35,9 @@ public class SampleService extends RequestService {
                 return new CrudSyncPhoneDeleteOperation();
             case PoCRequestFactory.REQUEST_TYPE_CRUD_SYNC_PHONE_ADD:
             case PoCRequestFactory.REQUEST_TYPE_CRUD_SYNC_PHONE_EDIT:
-                return new CrudSyncPhoneAddEditOperation();
-            case PoCRequestFactory.REQUEST_TYPE_RSS_FEED:
-                return new RssFeedOperation();*/
+                return new CrudSyncPhoneAddEditOperation();*/
+            case SampleRequestFactory.REQUEST_TYPE_RSS_FEED:
+                return new RssFeedOperation();
         }
         return null;
     }
@@ -45,8 +46,7 @@ public class SampleService extends RequestService {
     protected Bundle onCustomRequestException(Request request, CustomRequestException exception) {
         if (exception instanceof MyCustomRequestException) {
             Bundle bundle = new Bundle();
-            bundle.putString(SampleRequestFactory.BUNDLE_EXTRA_ERROR_MESSAGE,
-                    "MyCustomRequestException thrown.");
+            bundle.putString(SampleRequestFactory.BUNDLE_EXTRA_ERROR_MESSAGE, "MyCustomRequestException thrown.");
             return bundle;
         }
         return super.onCustomRequestException(request, exception);
